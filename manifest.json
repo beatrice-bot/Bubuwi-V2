@@ -1,11 +1,11 @@
 {
-  "name": "Bubuwi",
-  "short_name": "Bubuwi",
+  "name": "Bubuwi-V2",
+  "short_name": "Bubuwi-V2",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#121212",
-  "description": "Aplikasi nonton anime profesional.",
+  "description": "Aplikasi nonton anime PWA.",
   "icons": [
     { "src": "icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icons/icon-512x512.png", "sizes": "512x512", "type": "image/png" }
