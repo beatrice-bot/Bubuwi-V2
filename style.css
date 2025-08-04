@@ -21,9 +21,6 @@ body { font-family: var(--font-body); background-color: var(--bg-primary); color
 .anime-card { background-color: var(--bg-secondary); border-radius: 8px; overflow: hidden; text-decoration: none; color: var(--text-primary); }
 .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
 .anime-card .title { font-size: 0.8rem; padding: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.profile-card { text-align: center; padding: 1rem; background: var(--bg-secondary); border-radius: 12px; }
-.profile-pic { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 1rem; }
-#logout-button { background-color: #cf6679; color: white; margin-top: 1rem; }
 .detail-header { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
 .detail-header img { width: 120px; border-radius: 8px; }
 .video-container iframe { width: 100%; aspect-ratio: 16/9; border: none; border-radius: 12px; }
@@ -31,15 +28,9 @@ body { font-family: var(--font-body); background-color: var(--bg-primary); color
 .episode-selector { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
 .ep-button { background-color: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; color: var(--text-primary); }
 .ep-button.active { background-color: var(--accent-primary); color: #000; }
-.comment-section { margin-top: 2rem; }
-#comment-form { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-#comment-input { flex-grow: 1; background: var(--bg-secondary); border-radius: 20px; padding: 0.8rem 1rem; border: 1px solid var(--bg-tertiary); color: var(--text-primary); }
-.comment { display: flex; gap: 1rem; padding: 1rem; background-color: var(--bg-secondary); border-radius: 12px; margin-bottom: 1rem; align-items: flex-start; }
-.comment img { width: 40px; height: 40px; border-radius: 50%; }
-.comment-body .username { font-weight: 700; margin-bottom: 4px; }
-.comment-body .text { color: var(--text-secondary); line-height: 1.5; }
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: var(--bg-secondary); z-index: 10; border-top: 1px solid var(--bg-tertiary);}
 .nav-button { flex-grow: 1; background: none; border: none; color: var(--text-secondary); padding: 0.5rem 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
 .nav-button svg { width: 24px; height: 24px; fill: currentColor; }
 .nav-button span { font-size: 0.7rem; }
 .nav-button.active { color: var(--accent-primary); }
+.contact-link { display: flex; align-items: center; gap: 1rem; padding: 0.75rem; border-radius: 8px; text-decoration: none; color: var(--text-primary); background: var(--bg-tertiary); margin-bottom: 0.5rem;}
