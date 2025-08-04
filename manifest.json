@@ -1,0 +1,21 @@
+{
+  "name": "Bubuwi",
+  "short_name": "Bubuwi",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0d0b14",
+  "theme_color": "#0d0b14",
+  "description": "Aplikasi nonton anime sederhana untuk belajar.",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
