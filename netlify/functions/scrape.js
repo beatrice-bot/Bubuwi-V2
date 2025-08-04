@@ -14,7 +14,6 @@ exports.handler = async function (event, context) {
         else { data = await scrapeHomePage(); }
         return { statusCode: 200, body: JSON.stringify(data) };
     } catch (error) {
-        console.error('Scraping error:', error.message);
         return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
     }
 };
@@ -30,7 +29,7 @@ async function scrapeHomePage() {
         const link = element.find('.poster a').attr('href');
         const title = element.find('.title span a').text();
         const thumbnail = element.find('.poster img').attr('src');
-        if (title && link) sliderData.push({ title, link, thumbnail });
+        if (title && link) sliderData.push({ title, link, thumbnail, seriesTitle: title });
     });
 
     $('.bixbox .listupd article.bs').each((i, el) => {
