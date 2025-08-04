@@ -14,7 +14,6 @@ exports.handler = async function (event, context) {
         else { data = await scrapeHomePage(); }
         return { statusCode: 200, body: JSON.stringify(data) };
     } catch (error) {
-        console.error('Scraping error:', error.message);
         return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
     }
 };
@@ -25,8 +24,7 @@ async function scrapeHomePage() {
     const latestReleases = [];
     const sliderData = [];
 
-    // Mengambil data untuk slider (anti buram)
-    $('.slidtop .loop .slide-item').each((i, el) => {
+    $('.loop.owl-carousel .slide-item').each((i, el) => {
         const element = $(el);
         const link = element.find('.poster a').attr('href');
         const title = element.find('.title span a').text();
@@ -34,7 +32,6 @@ async function scrapeHomePage() {
         if (title && link) sliderData.push({ title, link, thumbnail, seriesTitle: title });
     });
 
-    // Mengambil data untuk rilis terbaru
     $('.bixbox .listupd article.bs').each((i, el) => {
         const element = $(el);
         const linkElement = element.find('a');
