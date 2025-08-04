@@ -14,6 +14,7 @@ exports.handler = async function (event, context) {
         else { data = await scrapeHomePage(); }
         return { statusCode: 200, body: JSON.stringify(data) };
     } catch (error) {
+        console.error('Scraping error:', error.message);
         return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
     }
 };
@@ -24,18 +25,14 @@ async function scrapeHomePage() {
     const latestReleases = [];
     const sliderData = [];
 
-    // Ambil data untuk slider
     $('.loop.owl-carousel .slide-item').each((i, el) => {
         const element = $(el);
         const link = element.find('.poster a').attr('href');
         const title = element.find('.title span a').text();
         const thumbnail = element.find('.poster img').attr('src');
-        if (title && link) {
-            sliderData.push({ title, link, thumbnail });
-        }
+        if (title && link) sliderData.push({ title, link, thumbnail });
     });
 
-    // Ambil data untuk rilis terbaru
     $('.bixbox .listupd article.bs').each((i, el) => {
         const element = $(el);
         const linkElement = element.find('a');
@@ -44,9 +41,7 @@ async function scrapeHomePage() {
         const link = linkElement.attr('href');
         const thumbnail = element.find('img').attr('src');
         const episode = element.find('.epx').text().trim();
-        if (seriesTitle && link) {
-            latestReleases.push({ seriesTitle, link, thumbnail, episode });
-        }
+        if (seriesTitle && link) latestReleases.push({ seriesTitle, link, thumbnail, episode });
     });
 
     return { type: 'homepage', slider: sliderData.slice(0, 5), latest: latestReleases };
@@ -63,7 +58,7 @@ async function scrapeSearchFeed(query) {
             const pageResponse = await axios.get(animePageUrl);
             const $ = cheerio.load(pageResponse.data);
             const thumbnail = $('.thumb img').attr('src') || null;
-            return { title: item.title[0], link: animePageUrl, seriesTitle: item.title[0], thumbnail: thumbnail };
+            return { title: item.title[0], link: animePageUrl, seriesTitle: item.title[0], thumbnail };
         } catch (error) {
             return { title: item.title[0], link: item.link[0], seriesTitle: item.title[0], thumbnail: null };
         }
@@ -80,8 +75,7 @@ async function scrapeAnimePage(url) {
         episodes.push({ title: linkElement.find('.epl-title').text(), link: linkElement.attr('href') });
     });
     const thumbnail = $('.thumb img').attr('src');
-    const episodeCount = episodes.length;
-    return { type: 'animePage', episodes: episodes.reverse(), thumbnail, episodeCount }; // reverse() agar episode 1 di atas
+    return { type: 'animePage', episodes: episodes.reverse(), thumbnail };
 }
 
 async function scrapeEpisodePage(episodeUrl) {
@@ -93,7 +87,6 @@ async function scrapeEpisodePage(episodeUrl) {
         const src = $(el).attr('src');
         if (src) videoFrames.push(src);
     });
-    // Cari link download jika ada
     let downloadLink = $('.download-eps a').attr('href');
     return { type: 'episode', title, videoFrames: videoFrames.length > 0 ? videoFrames : [], downloadLink };
 }
