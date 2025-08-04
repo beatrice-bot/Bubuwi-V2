@@ -5,52 +5,50 @@
     --accent-secondary: #03dac6; --font-body: 'Poppins', sans-serif;
 }
 body { font-family: var(--font-body); background-color: var(--bg-primary); color: var(--text-primary); margin: 0; padding-top: 60px; padding-bottom: 70px; }
-#app-content { padding: 1rem; }
-.loader { text-align: center; margin-top: 4rem; }
-.page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
-.section-title { font-size: 1.2rem; font-weight: 600; margin: 2rem 0 1rem 0; }
+.loader { text-align: center; margin-top: 4rem; padding: 2rem; }
+.page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; padding: 0 1rem; }
+.section-title { font-size: 1.2rem; font-weight: 600; margin: 2rem 1rem 1rem 1rem; }
 .main-header { position: fixed; top: 0; left: 0; right: 0; padding: 0.75rem 1rem; background: rgba(18, 18, 18, 0.8); backdrop-filter: blur(10px); z-index: 10; display: flex; align-items: center; justify-content: center; gap: 0.75rem; border-bottom: 1px solid var(--bg-tertiary); }
 .header-logo { width: 35px; height: 35px; }
 .main-header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: var(--accent-secondary); text-shadow: 0 0 10px var(--accent-secondary); margin: 0; }
+#app-content { padding: 0.5rem; }
 
 /* Slider */
 .swiper-container { width: 100%; height: 200px; margin-bottom: 1.5rem; border-radius: 12px; }
 .swiper-slide { position: relative; display: flex; align-items: flex-end; background-size: cover; background-position: center; border-radius: 12px; overflow: hidden; text-decoration: none;}
-.swiper-slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
+.swiper-slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
 .swiper-slide .title { color: white; z-index: 2; padding: 1rem; font-weight: 600; }
 
 /* Form & Tombol */
-#search-form { margin-bottom: 1.5rem; }
+#search-form { margin: 0 0.5rem 1.5rem 0.5rem; }
 #search-input { width: 100%; box-sizing: border-box; padding: 0.8rem 1rem; border: 1px solid var(--bg-tertiary); border-radius: 20px; background: var(--bg-secondary); color: var(--text-primary); }
 .button { background-color: var(--accent-primary); color: #000; border: none; border-radius: 20px; padding: 0.8rem 1.5rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; text-align: center;}
-.button:disabled { background-color: var(--bg-tertiary); color: var(--text-secondary); cursor: not-allowed; }
 
 /* Grid & Card */
-.anime-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-.anime-card { background-color: var(--bg-secondary); border-radius: 8px; overflow: hidden; text-decoration: none; color: var(--text-primary); position: relative; }
+.anime-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; padding: 0 0.5rem; }
+.anime-card { background-color: var(--bg-secondary); border-radius: 8px; overflow: hidden; text-decoration: none; color: var(--text-primary); }
 .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
 .anime-card .title { font-size: 0.8rem; padding: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.anime-card .episode-badge { position: absolute; top: 8px; left: 8px; background-color: var(--accent-primary); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; z-index: 2; }
 
-/* Detail & Nonton (PERBAIKAN TAMPILAN) */
-.info-box { background: var(--bg-secondary); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--bg-tertiary); }
-.detail-header { display: flex; gap: 1rem; align-items: center; }
-.detail-header img { width: 100px; border-radius: 8px; border: 2px solid var(--bg-tertiary); }
-.detail-header h2 { font-size: 1.4rem; }
+/* Detail & Nonton */
+.detail-info-box, .watch-info-box { background: var(--bg-secondary); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid var(--bg-tertiary); }
+.detail-header { display: flex; gap: 1rem; }
+.detail-header img { width: 120px; border-radius: 8px; }
 .video-container iframe { width: 100%; aspect-ratio: 16/9; border: none; border-radius: 12px; }
-.episode-nav { display: flex; justify-content: space-between; margin-top: 1rem; }
-.episode-selector { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+.episode-nav { display: flex; justify-content: space-between; margin: 1rem 0; }
+.episode-selector { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
 .ep-button { background-color: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; color: var(--text-primary); }
-.ep-button.active { background-color: var(--accent-primary); color: #000; font-weight: 700; }
-.episode-list-styled .episode-card { background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; text-decoration: none; color: var(--text-primary); display: block; border-left: 3px solid var(--accent-secondary); }
+.ep-button.active { background-color: var(--accent-primary); color: #000; }
+.episode-list-styled { display: flex; flex-direction: column; gap: 0.5rem; }
+.episode-list-styled .episode-card { background: var(--bg-tertiary); }
 
-/* Kontak (PERBAIKAN TAMPILAN) */
-.contact-container { text-align: center; }
+/* Kontak */
+.contact-container { text-align: center; padding: 1rem; }
 .contact-page-logo { width: 80px; height: 80px; margin: 0 auto 1rem auto; border: 2px solid var(--accent-primary); border-radius: 16px; padding: 4px; }
 .contact-link { display: flex; align-items: center; gap: 1rem; padding: 0.75rem; border-radius: 8px; text-decoration: none; color: var(--text-primary); background: var(--bg-tertiary); margin: 0.5rem 0; }
 .contact-link img { width: 30px; height: 30px; border-radius: 6px; }
 
-/* Navigasi Bawah */
+/* Navigasi Bawah (TERKUNCI) */
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: var(--bg-secondary); z-index: 10; border-top: 1px solid var(--bg-tertiary);}
 .nav-button { flex-grow: 1; background: none; border: none; color: var(--text-secondary); padding: 0.5rem 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
 .nav-button svg { width: 24px; height: 24px; fill: currentColor; }
