@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bubuwi-cache-v2';
+const CACHE_NAME = 'bubuwi-v2-cache';
 const urlsToCache = [
   '/',
   '/index.html',
