@@ -24,11 +24,13 @@ async function scrapeHomePage() {
     const latestReleases = [];
     const sliderData = [];
 
-    $('.loop.owl-carousel .slide-item').each((i, el) => {
+    // Mengambil data untuk slider (gambar anti buram)
+    $('.slidtop .loop .slide-item').each((i, el) => {
         const element = $(el);
         const link = element.find('.poster a').attr('href');
         const title = element.find('.title span a').text();
-        const thumbnail = element.find('.poster img').attr('src');
+        // Ambil gambar dari slide-bg untuk resolusi lebih tinggi
+        const thumbnail = element.find('.slide-bg img').attr('src'); 
         if (title && link) sliderData.push({ title, link, thumbnail, seriesTitle: title });
     });
 
