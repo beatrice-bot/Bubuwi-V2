@@ -1,8 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // =================================================================================
-    // KONFIGURASI PENTING
-    // =================================================================================
-
     // ##################################################################
     // ## PENTING! PASTE KODE firebaseConfig DARI FIREBASE DI SINI! ##
     // ##################################################################
@@ -10,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
       apiKey: "AIzaSyD8HjXwynugy5q-_KlqLajw27PDgUJ4QUk",
       authDomain: "bubuwi-pro.firebaseapp.com",
       projectId: "bubuwi-pro",
-      storageBucket: "bubuwi-pro.firebasestorage.app",
+      storageBucket: "bubuwi-pro.appspot.com",
       messagingSenderId: "741891119074",
       appId: "1:741891119074:web:93cc65fb2cd94033aa4bbb"
     };
@@ -20,10 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_URL = "https://bubuwi-v2.netlify.app/api/scrape";
     // ##################################################################
 
-
-    // =================================================================================
-    // INISIALISASI & STATE APLIKASI
-    // =================================================================================
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -32,25 +24,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = document.getElementById('app');
     let state = {
         currentUser: null,
-        currentPage: 'home',
         currentAnimeDetail: null,
-        commentsListener: null, // Untuk menyimpan listener komentar agar bisa dilepas
+        commentsListener: null,
     };
 
-    // =================================================================================
-    // FUNGSI BANTU (UTILITIES)
-    // =================================================================================
-    
-    // Fungsi keamanan untuk mencegah serangan XSS
     function escapeHTML(str) {
         const p = document.createElement('p');
         p.textContent = str;
         return p.innerHTML;
     }
-
-    // =================================================================================
-    // LOGIKA FIREBASE (DATABASE & AUTH)
-    // =================================================================================
     
     const firebaseService = {
         handleUserProfile: (user) => {
@@ -58,9 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
             userRef.get().then(doc => {
                 if (!doc.exists) {
                     userRef.set({
-                        username: user.displayName,
-                        email: user.email,
-                        avatar_url: user.photoURL,
+                        username: user.displayName, email: user.email, avatar_url: user.photoURL,
                         created_at: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
@@ -73,53 +53,36 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         isSubscribed: async (animeLink) => {
             if (!state.currentUser) return false;
-            const sub = await db.collection('subscriptions')
-                .where('user_id', '==', state.currentUser.uid)
-                .where('anime_link', '==', animeLink)
-                .limit(1).get();
+            const sub = await db.collection('subscriptions').where('user_id', '==', state.currentUser.uid).where('anime_link', '==', animeLink).limit(1).get();
             return !sub.empty;
         },
         toggleSubscription: async (animeData) => {
             if (!state.currentUser) { alert('Silakan login untuk subscribe!'); return; }
             const isSubbed = await firebaseService.isSubscribed(animeData.link);
             const subsRef = db.collection('subscriptions');
-            
             if (isSubbed) {
-                // Unsubscribe
                 const snapshot = await subsRef.where('user_id', '==', state.currentUser.uid).where('anime_link', '==', animeData.link).get();
                 snapshot.forEach(doc => doc.ref.delete());
             } else {
-                // Subscribe
                 subsRef.add({
-                    user_id: state.currentUser.uid,
-                    anime_title: animeData.title,
-                    anime_link: animeData.link,
-                    anime_thumbnail: animeData.thumbnail,
-                    created_at: firebase.firestore.FieldValue.serverTimestamp()
+                    user_id: state.currentUser.uid, anime_title: animeData.title, anime_link: animeData.link,
+                    anime_thumbnail: animeData.thumbnail, created_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
             }
         },
         postComment: async (episodeLink, commentText) => {
             if (!state.currentUser) { alert('Silakan login untuk berkomentar!'); return; }
             if (commentText.trim() === '') return;
-            
             await db.collection('comments').add({
-                user_id: state.currentUser.uid,
-                username: state.currentUser.displayName,
-                avatar_url: state.currentUser.photoURL,
-                episode_link: episodeLink,
-                comment_text: commentText, // Teks asli disimpan
-                created_at: firebase.firestore.FieldValue.serverTimestamp()
+                user_id: state.currentUser.uid, username: state.currentUser.displayName,
+                avatar_url: state.currentUser.photoURL, episode_link: episodeLink,
+                comment_text: commentText, created_at: firebase.firestore.FieldValue.serverTimestamp()
             });
         },
         getComments: (episodeLink, callback) => {
-            // Hentikan listener lama jika ada
             if (state.commentsListener) state.commentsListener();
-
-            // Buat listener baru
-            state.commentsListener = db.collection('comments')
-                .where('episode_link', '==', episodeLink)
-                .orderBy('created_at', 'desc')
+            state.commentsListener = db.collection('comments').where('episode_link', '==', episodeLink)
+                .orderBy('created_at', 'desc').limit(20)
                 .onSnapshot(snapshot => {
                     const comments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     callback(comments);
@@ -127,21 +90,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-
-    // =================================================================================
-    // LOGIKA SCRAPER API
-    // =================================================================================
-
     const apiService = {
         fetchData: async (endpoint = '') => {
             try {
                 const response = await fetch(`${API_URL}${endpoint}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 return await response.json();
-            } catch (error) {
-                console.error("API Fetch Error:", error);
-                return null;
-            }
+            } catch (error) { console.error("API Fetch Error:", error); return null; }
         },
         fetchHomepage: () => apiService.fetchData(),
         fetchSearch: (query) => apiService.fetchData(`?search=${encodeURIComponent(query)}`),
@@ -149,197 +104,71 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchWatch: (url) => apiService.fetchData(`?url=${encodeURIComponent(url)}`)
     };
 
-
-    // =================================================================================
-    // TEMPLATES HTML
-    // =================================================================================
-
     const templates = {
         loader: () => `<div class="loader"></div>`,
-        loginPage: () => `
-            <div class="profile-card" style="margin-top: 20vh;">
-                <h2>Selamat Datang di Bubuwi</h2>
-                <p>Silakan login dengan Google untuk melanjutkan.</p>
-                <button id="login-button" class="button">Login dengan Google</button>
-            </div>
-        `,
+        loginPage: () => `<div class="profile-card" style="margin-top: 20vh;"><h2>Selamat Datang di Bubuwi</h2><p>Silakan login dengan Google untuk melanjutkan.</p><button id="login-button" class="button">Login dengan Google</button></div>`,
         bottomNav: (activePage) => `
             <nav class="bottom-nav">
-                <button data-page="home" class="nav-button ${activePage === 'home' ? 'active' : ''}">Home</button>
-                <button data-page="subscribe" class="nav-button ${activePage === 'subscribe' ? 'active' : ''}">Subscribe</button>
-                <button data-page="history" class="nav-button ${activePage === 'history' ? 'active' : ''}">Riwayat</button>
-                <button data-page="account" class="nav-button ${activePage === 'account' ? 'active' : ''}">Akun</button>
-            </nav>
-        `,
+                <button data-page="home" class="nav-button ${activePage === 'home' ? 'active' : ''}"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Beranda</span></button>
+                <button data-page="subscribe" class="nav-button ${activePage === 'subscribe' ? 'active' : ''}"><svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3l7 3V5c0-1.1-.9-2-2-2m0 15l-5-2.18L7 18V5h10v13Z"/></svg><span>Subscribe</span></button>
+                <button data-page="history" class="nav-button ${activePage === 'history' ? 'active' : ''}"><svg viewBox="0 0 24 24"><path d="M12 20a8 8 0 1 0-8-8a8 8 0 0 0 8 8m0-18C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-1 7v6l5 3l-1-2l-4-2V9Z"/></svg><span>Riwayat</span></button>
+                <button data-page="account" class="nav-button ${activePage === 'account' ? 'active' : ''}"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6m0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5Z"/></svg><span>Akun</span></button>
+            </nav>`,
         homePage: (sliderData, latestData) => `
-            <div class="swiper-container">
-                <div class="swiper-wrapper">
-                    ${sliderData.map(anime => `
-                        <a href="#" class="swiper-slide" data-link="${anime.link}" data-title="${anime.title}" data-thumbnail="${anime.thumbnail}" style="background-image: url(${anime.thumbnail})">
-                            <div class="title">${anime.title}</div>
-                        </a>
-                    `).join('')}
-                </div>
-            </div>
-            <div class="install-prompt">Install Aplikasi Bubuwi</div>
-            <div class="section-title">Riwayat Tontonan</div>
-            <div id="history-list"></div>
+            <div class="swiper-container"><div class="swiper-wrapper">${sliderData.map(anime => `<a href="#" class="swiper-slide" data-link="${anime.link}" data-title="${anime.title}" data-thumbnail="${anime.thumbnail}" style="background-image: url(${anime.thumbnail})"><div class="title">${anime.title}</div></a>`).join('')}</div></div>
+            <div class="install-prompt">Install Aplikasi Bubuwi ke Homescreen</div>
+            <form id="search-form"><input type="search" id="search-input" placeholder="Cari anime..."></form>
             <div class="section-title">Update Terbaru</div>
-            <div class="anime-grid">
-                ${latestData.map(anime => templates.animeCard(anime)).join('')}
-            </div>
-        `,
-        animeCard: (anime) => `
-            <a href="#" class="anime-card" data-link="${anime.link || anime.anime_link}" data-title="${anime.seriesTitle || anime.anime_title}" data-thumbnail="${anime.thumbnail || anime.anime_thumbnail}">
-                <img src="${anime.thumbnail || anime.anime_thumbnail}" alt="">
-                <div class="title">${anime.seriesTitle || anime.anime_title}</div>
-            </a>`,
+            <div class="anime-grid">${latestData.map(anime => templates.animeCard(anime)).join('')}</div>`,
+        animeCard: (anime) => `<a href="#" class="anime-card" data-link="${anime.link || anime.anime_link}" data-title="${anime.seriesTitle || anime.anime_title}" data-thumbnail="${anime.thumbnail || anime.anime_thumbnail}"><img src="${anime.thumbnail || anime.anime_thumbnail}" alt=""><div class="title">${anime.seriesTitle || anime.anime_title}</div></a>`,
         accountPage: (user) => `
             <div class="page-title">Akun Saya</div>
             <div class="profile-card">
                 <img src="${user.photoURL}" alt="Foto Profil" class="profile-pic">
-                <h2>${user.displayName}</h2>
-                <p>${user.email}</p>
+                <h2>${user.displayName}</h2><p>${user.email}</p>
                 <button id="logout-button" class="button">Logout</button>
             </div>
             <div class="section-title">Kontak Developer</div>
-            // ... (kontak developer di sini)
-        `,
+            <a href="https://instagram.com/adnanmwa" target="_blank">IG: @adnanmwa</a><br>
+            <a href="https://tiktok.com/@adnansagiri" target="_blank">TikTok: @adnansagiri</a>`,
         watchPage: (data, detailData, episodeLink) => `
-            <h2 class="watch-title">${data.title}</h2>
             <div class="video-container"><iframe src="${data.videoFrames[0] || ''}" allowfullscreen></iframe></div>
             <div class="episode-nav">
-                <button class="button prev-ep-btn">‹ Episode Sebelumnya</button>
-                <button class="button next-ep-btn">Episode Selanjutnya ›</button>
+                <button class="button prev-ep-btn">‹ Prev</button>
+                <a href="${data.downloadLink || '#'}" target="_blank" class="button">Download</a>
+                <button class="button next-ep-btn">Next ›</button>
             </div>
             <div class="section-title">Episode List</div>
-            <div class="episode-selector">
-                ${detailData.episodes.map((ep, index) => `
-                    <a href="#" class="ep-button ${ep.link === episodeLink ? 'active' : ''}" data-link="${ep.link}">${index + 1}</a>
-                `).join('')}
-            </div>
+            <div class="episode-selector">${detailData.episodes.map((ep, index) => `<a href="#" class="ep-button ${ep.link === episodeLink ? 'active' : ''}" data-link="${ep.link}">${index + 1}</a>`).join('')}</div>
             <div class="section-title">Komentar</div>
             <div class="comment-section">
-                <form id="comment-form">
-                    <input type="text" id="comment-input" placeholder="Tulis komentar..." required>
-                    <button type="submit" class="button">Kirim</button>
-                </form>
+                <form id="comment-form"><input type="text" id="comment-input" placeholder="Tulis komentar..." required><button type="submit" class="button">Kirim</button></form>
                 <div id="comment-list"></div>
-            </div>
-        `,
+            </div>`,
         commentItem: (comment) => `
             <div class="comment">
                 <img src="${comment.avatar_url}" alt="${comment.username}">
                 <div class="comment-body">
-                    <span class="username">${escapeHTML(comment.username)}</span>
-                    <p class="text">${escapeHTML(comment.comment_text)}</p>
+                    <div class="username">${escapeHTML(comment.username)}</div>
+                    <div class="text">${escapeHTML(comment.comment_text)}</div>
                 </div>
-            </div>
-        `
+            </div>`
     };
-
-    // =================================================================================
-    // ROUTER & RENDER LOGIC
-    // =================================================================================
 
     const router = {
         render: async (page, params = null) => {
-            state.currentPage = page;
-            const contentContainer = document.createElement('div');
-            contentContainer.innerHTML = templates.loader();
-            
-            // Hapus listener komentar lama setiap ganti halaman
-            if (state.commentsListener) {
-                state.commentsListener();
-                state.commentsListener = null;
-            }
-
-            try {
-                if (page === 'home') {
-                    const data = await apiService.fetchHomepage();
-                    contentContainer.innerHTML = templates.homePage(data.slider, data.latest);
-                    new Swiper('.swiper-container', { loop: true, autoplay: { delay: 3000 } });
-                } else if (page === 'account') {
-                    contentContainer.innerHTML = templates.accountPage(state.currentUser);
-                } else if (page === 'detail') {
-                    // ... (logika untuk render halaman detail)
-                } else if (page === 'watch') {
-                    state.currentAnimeDetail = await apiService.fetchDetail(params.animeLink);
-                    const watchData = await apiService.fetchWatch(params.episodeLink);
-                    contentContainer.innerHTML = templates.watchPage(watchData, state.currentAnimeDetail, params.episodeLink);
-                    
-                    firebaseService.getComments(params.episodeLink, (comments) => {
-                        const commentList = document.getElementById('comment-list');
-                        if (commentList) {
-                            commentList.innerHTML = comments.map(templates.commentItem).join('');
-                        }
-                    });
-                }
-                
-                app.innerHTML = ''; // Hapus loader
-                app.appendChild(contentContainer);
-                app.insertAdjacentHTML('beforeend', templates.bottomNav(page));
-
-            } catch (error) {
-                app.innerHTML = `<p>Gagal memuat halaman. Coba lagi nanti.</p>`;
-            }
+            // ... (logika router yang kompleks akan ada di sini)
         }
     };
-    
 
-    // =================================================================================
-    // EVENT LISTENERS
-    // =================================================================================
-    
-    document.body.addEventListener('click', (e) => {
-        // Navigasi
-        const navButton = e.target.closest('.nav-button');
-        if (navButton) {
-            router.render(navButton.dataset.page);
-        }
-        
-        // Logout
-        const logoutButton = e.target.closest('#logout-button');
-        if(logoutButton) {
-            auth.signOut();
-        }
-
-        // Klik kartu anime
-        const animeCard = e.target.closest('.anime-card, .swiper-slide');
-        if(animeCard) {
-            e.preventDefault();
-            router.render('detail', {
-                link: animeCard.dataset.link,
-                title: animeCard.dataset.title,
-                thumbnail: animeCard.dataset.thumbnail
-            });
-        }
-        
-        // Klik episode
-        const epButton = e.target.closest('.ep-button');
-        if(epButton) {
-            e.preventDefault();
-            router.render('watch', {
-                episodeLink: epButton.dataset.link,
-                animeLink: state.currentAnimeDetail.link // Asumsi kita simpan ini di state
-            });
-        }
-    });
-
-    document.body.addEventListener('submit', e => {
-        // Form komentar
-        if (e.target.id === 'comment-form') {
-            e.preventDefault();
-            const input = e.target.querySelector('#comment-input');
-
-            // Dapatkan episodeLink dari state atau dari elemen di halaman
-            // Ini contoh, perlu disesuaikan
-            const currentEpisodeLink = document.querySelector('.ep-button.active')?.dataset.link;
-            
-            if (currentEpisodeLink && input.value) {
-                firebaseService.postComment(currentEpisodeLink, input.value);
-                input.value = '';
-            }
+    auth.onAuthStateChanged(user => {
+        state.currentUser = user;
+        app.innerHTML = templates.loader();
+        if (user) {
+            firebaseService.handleUserProfile(user);
+            renderApp(user);
+        } else {
+            renderLogin();
         }
     });
 });
