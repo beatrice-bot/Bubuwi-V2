@@ -9,47 +9,37 @@ body { font-family: var(--font-body); background-color: var(--bg-primary); color
 .loader { text-align: center; margin-top: 4rem; }
 .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
 .section-title { font-size: 1.2rem; font-weight: 600; margin: 2rem 0 1rem 0; }
-
-/* Slider Berita */
 .swiper-container { width: 100%; height: 200px; margin-bottom: 1.5rem; border-radius: 12px; }
 .swiper-slide { position: relative; display: flex; align-items: flex-end; background-size: cover; background-position: center; border-radius: 12px; overflow: hidden; text-decoration: none;}
 .swiper-slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
 .swiper-slide .title { color: white; z-index: 2; padding: 1rem; font-weight: 600; }
-
-/* Tombol & Form */
 .button { background-color: var(--accent-primary); color: #000; border: none; border-radius: 20px; padding: 0.8rem 1.5rem; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; text-align: center;}
 #search-form { margin-bottom: 1.5rem; }
 #search-input { width: 100%; box-sizing: border-box; padding: 0.8rem 1rem; border: 1px solid var(--bg-tertiary); border-radius: 20px; background: var(--bg-secondary); color: var(--text-primary); }
 .install-prompt { background-color: var(--accent-secondary); color: #000; text-align: center; padding: 0.8rem; border-radius: 12px; margin-bottom: 1.5rem; cursor: pointer; font-weight: 600; }
-
-/* Grid & Card */
 .anime-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 .anime-card { background-color: var(--bg-secondary); border-radius: 8px; overflow: hidden; text-decoration: none; color: var(--text-primary); }
 .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
 .anime-card .title { font-size: 0.8rem; padding: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* Halaman Akun */
 .profile-card { text-align: center; padding: 1rem; background: var(--bg-secondary); border-radius: 12px; }
 .profile-pic { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 1rem; }
 #logout-button { background-color: #cf6679; color: white; margin-top: 1rem; }
-
-/* Halaman Detail & Nonton */
 .detail-header { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
 .detail-header img { width: 120px; border-radius: 8px; }
 .video-container iframe { width: 100%; aspect-ratio: 16/9; border: none; border-radius: 12px; }
 .episode-nav { display: flex; justify-content: space-between; margin: 1rem 0; }
 .episode-selector { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
-.episode-selector .ep-button { background-color: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; color: var(--text-primary); }
-.episode-selector .ep-button.active { background-color: var(--accent-primary); color: #000; }
+.ep-button { background-color: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; color: var(--text-primary); }
+.ep-button.active { background-color: var(--accent-primary); color: #000; }
 .comment-section { margin-top: 2rem; }
 #comment-form { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
 #comment-input { flex-grow: 1; background: var(--bg-secondary); border-radius: 20px; padding: 0.8rem 1rem; border: 1px solid var(--bg-tertiary); color: var(--text-primary); }
-.comment { display: flex; gap: 1rem; padding: 1rem; background-color: var(--bg-secondary); border-radius: 12px; margin-bottom: 1rem; }
+.comment { display: flex; gap: 1rem; padding: 1rem; background-color: var(--bg-secondary); border-radius: 12px; margin-bottom: 1rem; align-items: flex-start; }
 .comment img { width: 40px; height: 40px; border-radius: 50%; }
-.comment-body .username { font-weight: 600; }
-.comment-body .text { margin-top: 4px; }
-
-/* Navigasi Bawah */
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: var(--bg-secondary); z-index: 10; }
-.nav-button { flex-grow: 1; background: none; border: none; color: var(--text-secondary); padding: 0.5rem 0; }
+.comment-body .username { font-weight: 700; margin-bottom: 4px; }
+.comment-body .text { color: var(--text-secondary); line-height: 1.5; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: var(--bg-secondary); z-index: 10; border-top: 1px solid var(--bg-tertiary);}
+.nav-button { flex-grow: 1; background: none; border: none; color: var(--text-secondary); padding: 0.5rem 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.nav-button svg { width: 24px; height: 24px; fill: currentColor; }
+.nav-button span { font-size: 0.7rem; }
 .nav-button.active { color: var(--accent-primary); }
