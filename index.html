@@ -12,14 +12,81 @@
 <body>
 
     <div id="login-page" class="view active">
+        <div class="login-container">
+            <h1>Silahkan Login Ke Bubuwi-V2 Menggunakan Google</h1>
+            <div id="login-btn" class="login-box">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2sSeQqjaUTuZ3gRgkKjidpaipF_l6s72lBw&s" alt="Google Logo">
+                <span>Login Google</span>
+            </div>
         </div>
+    </div>
 
     <div id="app-container" style="display: none;">
         <main id="main-content">
+            <div id="home-view" class="view">
+                <div class="slider-container">
+                    <div class="slider"></div>
+                </div>
+                <div class="search-section card">
+                    <input type="text" id="search-input" placeholder="Cari anime...">
+                    <button id="search-button">Submit</button>
+                </div>
+                <div class="history-preview-section">
+                    <h3><i class="fas fa-history"></i> Riwayat Tontonan</h3>
+                    <div class="anime-grid-mini" id="home-history-list"></div>
+                </div>
+                <div class="latest-release-section">
+                    <h3><i class="fas fa-fire"></i> Baru Rilis</h3>
+                    <div class="anime-grid" id="latest-releases-list"></div>
+                </div>
+                <div class="popular-section">
+                    <h3><i class="fas fa-star"></i> Populer Minggu Ini</h3>
+                    <div class="popular-list" id="popular-list"></div>
+                </div>
+            </div>
+
+            <div id="search-results-view" class="view">
+                <button class="back-button"><i class="fas fa-arrow-left"></i> Kembali</button>
+                <h3>Hasil Pencarian</h3>
+                <div class="anime-grid" id="search-results-list"></div>
+            </div>
+
+            <div id="subscribe-view" class="view">
+                <h3><i class="fas fa-bookmark"></i> Anime yang Di-subscribe</h3>
+                <div id="subscribed-list" class="empty-state-container"></div>
+            </div>
+
+            <div id="history-view" class="view">
+                <h3><i class="fas fa-history"></i> Riwayat Tontonan</h3>
+                <div id="history-list" class="anime-grid"></div>
+            </div>
+
+            <div id="account-view" class="view">
+                <div class="account-logo-card card">
+                    <img src="https://i.imgur.com/9uK2OPw.png" alt="Bubuwi Logo" class="account-logo">
+                </div>
+                <div class="account-info-card card">
+                    <img id="user-pic" src="" alt="User Profile" class="profile-pic">
+                    <h2 id="user-name"></h2>
+                    <p id="user-email"></p>
+                </div>
+                 <div class="developer-contact card">
+                    <h4>Kontak Developer</h4>
+                    <a href="https://www.instagram.com/adnanmwa" target="_blank" class="contact-item">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLht-agYy8VEU-3bkfGKEr9sqEe--B8jfA7Q&s" alt="Instagram">
+                        <span>@adnanmwa</span>
+                    </a>
+                    <a href="https://www.tiktok.com/@adnansagiri" target="_blank" class="contact-item">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrLEt7CpnTRQ1va0on-RGO3aDsgpdlNFUoaw&s" alt="TikTok">
+                        <span>@adnansagiri</span>
+                    </a>
+                </div>
+                <button id="logout-btn" class="logout-button">Logout</button>
+            </div>
+            
             <div id="episode-list-view" class="view">
                 <button class="back-button"><i class="fas fa-arrow-left"></i> Kembali</button>
-                <div id="anime-detail-header" class="card">
-                    </div>
+                <div id="anime-detail-header" class="card"></div>
                 <div id="anime-detail-synopsis" class="card synopsis-card">
                     <h4>Sinopsis</h4>
                     <p></p>
@@ -66,7 +133,11 @@
         </main>
         
         <nav id="bottom-nav">
-            </nav>
+            <button class="nav-button active" data-view="home-view"><i class="fas fa-home"></i><span>Utama</span></button>
+            <button class="nav-button" data-view="subscribe-view"><i class="fas fa-bookmark"></i><span>Subscribe</span></button>
+            <button class="nav-button" data-view="history-view"><i class="fas fa-history"></i><span>Riwayat</span></button>
+            <button class="nav-button" data-view="account-view"><i class="fas fa-user"></i><span>Akun</span></button>
+        </nav>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-app-compat.js"></script>
