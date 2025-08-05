@@ -1,215 +1,258 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const appContent = document.getElementById('app-content');
-    const bottomNav = document.querySelector('.bottom-nav');
-
-    // ##################################################################
-    // ## PENTING! GANTI URL DI BAWAH INI DENGAN URL NETLIFY-MU! ##
-    // ##################################################################
-    const API_URL = "https://bubuwi-v2.netlify.app/api/scrape"; // GANTI DENGAN URL-MU
-    // ##################################################################
-
-    let state = { currentAnimeDetail: null, historyStack: [] };
-
-    const localData = {
-        getSubscriptions: () => JSON.parse(localStorage.getItem('bubuwi_subs')) || [],
-        addSubscription: (anime) => {
-            const subs = localData.getSubscriptions();
-            if (!subs.find(s => s.link === anime.link)) {
-                localStorage.setItem('bubuwi_subs', JSON.stringify([anime, ...subs]));
-            }
-        },
-        removeSubscription: (animeLink) => {
-            let subs = localData.getSubscriptions();
-            subs = subs.filter(s => s.link !== animeLink);
-            localStorage.setItem('bubuwi_subs', JSON.stringify(subs));
-        },
-        isSubscribed: (animeLink) => localData.getSubscriptions().some(s => s.link === animeLink),
-        getHistory: () => JSON.parse(localStorage.getItem('bubuwi_history')) || [],
-        addToHistory: (episode) => {
-            let history = localData.getHistory();
-            history = history.filter(item => item.anime_link !== episode.anime_link);
-            history.unshift(episode);
-            localStorage.setItem('bubuwi_history', JSON.stringify(history.slice(0, 12)));
-        }
+    // --- KONFIGURASI FIREBASE ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyD8HjXwynugy5q-_KlqLajw27PDgUJ4QUk",
+        authDomain: "bubuwi-pro.firebaseapp.com",
+        projectId: "bubuwi-pro",
+        storageBucket: "bubuwi-pro.appspot.com",
+        messagingSenderId: "741891119074",
+        appId: "1:741891119074:web:93cc65fb2cd94033aa4bbb"
     };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
 
-    const apiService = {
-        fetchData: async (endpoint = '') => {
-            try {
-                const response = await fetch(`${API_URL}${endpoint}`);
-                if (!response.ok) throw new Error('API Gagal merespon');
-                const data = await response.json();
-                if (!data) throw new Error('Data API kosong');
-                return data;
-            } catch (error) { console.error("API Fetch Error:", error); return null; }
-        }
-    };
+    // --- STATE APLIKASI ---
+    let currentUser = null;
+    let viewHistory = ['home-view']; // Untuk handle tombol kembali
+    let currentAnimeData = {}; // Menyimpan data anime yang sedang dilihat
 
-    const templates = {
-        loader: () => `<div class="loader"></div>`,
-        bottomNav: (activePage) => {
-            const pages = ['home', 'subscribe', 'history', 'contact'];
-            const icons = {
-                home: `<svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Beranda</span>`,
-                subscribe: `<svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3l7 3V5c0-1.1-.9-2-2-2m0 15l-5-2.18L7 18V5h10v13Z"/></svg><span>Subscribe</span>`,
-                history: `<svg viewBox="0 0 24 24"><path d="M12 20a8 8 0 1 0-8-8a8 8 0 0 0 8 8m0-18C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-1 7v6l5 3l-1-2l-4-2V9Z"/></svg><span>Riwayat</span>`,
-                contact: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6m0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5Z"/></svg><span>Kontak</span>`
-            };
-            return pages.map(p => `<button data-page="${p}" class="nav-button ${activePage === p ? 'active' : ''}">${icons[p]}</button>`).join('');
-        },
-        homePage: (sliderData, latestData, historyData) => `
-            <div class="swiper-container"><div class="swiper-wrapper">${sliderData.map(anime => templates.animeCard(anime, false)).join('')}</div></div>
-            <div style="padding: 0 1rem;"><form id="search-form"><input type="search" id="search-input" placeholder="Cari anime..."></form></div>
-            ${historyData.length > 0 ? `<div class="section-title">Terakhir Ditonton</div><div class="anime-grid">${historyData.map(anime => templates.animeCard(anime, false)).join('')}</div>` : ''}
-            <div class="section-title">Update Terbaru</div>
-            <div class="anime-grid">${latestData.map(anime => templates.animeCard(anime, true)).join('')}</div>`,
-        animeCard: (anime, isEpisode) => `
-            <a href="#" class="anime-card" data-link="${anime.link || anime.anime_link}" data-title="${anime.seriesTitle || anime.anime_title}" data-thumbnail="${anime.thumbnail || anime.anime_thumbnail}">
-                <img src="${anime.thumbnail || anime.anime_thumbnail}" alt="">
-                <div class="title">${anime.seriesTitle || anime.anime_title}</div>
-                ${isEpisode && anime.episode ? `<div class="episode-badge">${anime.episode}</div>` : ''}
-            </a>`,
-        searchPage: (results = []) => `<div class="page-title">Pencarian</div><form id="search-form"><input type="search" id="search-input" placeholder="Ketik judul anime..."></form><div class="anime-grid">${results.length > 0 ? results.map(anime => templates.animeCard(anime, false)).join('') : '<p>Ketik sesuatu untuk memulai pencarian.</p>'}</div>`,
-        subscribePage: () => {
-            const subs = localData.getSubscriptions();
-            return `<div class="page-title">Anime yang Kamu Subscribe</div><div class="anime-grid">${subs.length > 0 ? subs.map(anime => templates.animeCard(anime, false)).join('') : '<p style="padding: 0 1rem;">Kamu belum subscribe anime apapun.</p>'}</div>`;
-        },
-        historyPage: () => {
-            const history = localData.getHistory();
-            return `<div class="page-title">Riwayat Tontonan</div><div class="anime-grid">${history.length > 0 ? history.map(anime => templates.animeCard(anime, false)).join('') : '<p style="padding: 0 1rem;">Riwayat tontonanmu kosong.</p>'}</div>`;
-        },
-        contactPage: () => `
-            <div class="contact-container">
-                <div class="page-title">Kontak Developer</div>
-                <img src="https://i.imgur.com/9uK2OPw.png" alt="Logo Bubuwi" class="contact-page-logo">
-                <a href="https://www.instagram.com/adnanmwa" target="_blank" class="contact-link"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png"><span>@adnanmwa</span></a>
-                <a href="https://www.tiktok.com/@adnansagiri" target="_blank" class="contact-link"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNxuydAoOVzXmO6EXy6vZhaJ17jCGvYKITEzu7BNMYkEaux6HqKvnQax0Q&s=10"><span>@adnansagiri</span></a>
-            </div>`,
-        detailPage: (detailData, animeInfo) => {
-            const isSubscribed = localData.isSubscribed(animeInfo.link);
-            return `
-                <div class="detail-info-box">
-                    <div class="detail-header">
-                        <img src="${animeInfo.thumbnail}" alt="${animeInfo.title}">
-                        <div class="detail-info"><h2>${animeInfo.title}</h2><p>Total Episode: ${detailData.episodes.length}</p></div>
-                    </div>
-                    <button class="button subscribe-button ${isSubscribed ? 'subscribed' : ''}">${isSubscribed ? '✔ Unsubscribe' : '➕ Subscribe'}</button>
-                </div>
-                <div class="episode-list-styled">${detailData.episodes.map(ep => `<a href="#" class="episode-card" data-link="${ep.link}"><h3>${ep.title}</h3></a>`).join('')}</div>`;
-        },
-        watchPage: (watchData, detailData, currentEpisodeLink, animeInfo) => {
-            const currentIdx = detailData.episodes.findIndex(ep => ep.link === currentEpisodeLink);
-            const prevEp = currentIdx > 0 ? detailData.episodes[currentIdx - 1] : null;
-            const nextEp = currentIdx < detailData.episodes.length - 1 ? detailData.episodes[currentIdx + 1] : null;
-            return `
-                <div class="video-container"><iframe src="${watchData.videoFrames[0] || ''}" allowfullscreen></iframe></div>
-                <div class="watch-info-box">
-                    <div class="detail-header">
-                        <img src="${animeInfo.thumbnail}" alt="${animeInfo.title}" style="width: 50px; border-radius: 4px;">
-                        <div class="detail-info"><h2 style="font-size: 1.2rem;">${animeInfo.title}</h2><p style="margin: 0;">${watchData.title}</p></div>
-                    </div>
-                </div>
-                <div class="episode-nav">
-                    <button class="button prev-ep-btn" data-link="${prevEp?.link}" ${!prevEp ? 'disabled' : ''}>‹ Prev</button>
-                    <button class="button next-ep-btn" data-link="${nextEp?.link}" ${!nextEp ? 'disabled' : ''}>Next ›</button>
-                </div>
-                <div class="section-title">Episode List</div>
-                <div class="episode-selector">${detailData.episodes.map((ep, index) => `<a href="#" class="ep-button ${ep.link === currentEpisodeLink ? 'active' : ''}" data-link="${ep.link}">${index + 1}</a>`).join('')}</div>
-            `;
-        }
-    };
+    // --- ELEMEN DOM ---
+    const loginPage = document.getElementById('login-page');
+    const appContainer = document.getElementById('app-container');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const mainContent = document.getElementById('main-content');
+    const navButtons = document.querySelectorAll('.nav-button');
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+    const backButtons = document.querySelectorAll('.back-button');
+    const commentInput = document.getElementById('comment-input');
+    const commentSubmitBtn = document.getElementById('comment-submit-btn');
     
-    const router = {
-        render: async (page, params = null) => {
-            appContent.innerHTML = templates.loader();
-            bottomNav.innerHTML = templates.bottomNav(page);
-            try {
-                let content = '';
-                if (page === 'home') {
-                    const data = await apiService.fetchData();
-                    const history = localData.getHistory();
-                    content = templates.homePage(data.slider, data.latest, history);
-                } else if (page === 'search') {
-                    content = templates.searchPage();
-                } else if (page === 'subscribe') {
-                    content = templates.subscribePage();
-                } else if (page === 'history') {
-                    content = templates.historyPage();
-                } else if (page === 'contact') {
-                    content = templates.contactPage();
-                } else if (page === 'detail') {
-                    const data = await apiService.fetchData(`?animePage=${encodeURIComponent(params.link)}`);
-                    state.currentAnimeDetail = { ...data, ...params };
-                    content = templates.detailPage(data, params);
-                } else if (page === 'watch') {
-                    if (!state.currentAnimeDetail || state.currentAnimeDetail.link !== params.anime_link) {
-                        state.currentAnimeDetail = await apiService.fetchData(`?animePage=${encodeURIComponent(params.anime_link)}`);
-                        state.currentAnimeDetail.title = params.anime_title;
-                        state.currentAnimeDetail.thumbnail = params.thumbnail;
-                    }
-                    const watchData = await apiService.fetchData(`?url=${encodeURIComponent(params.link)}`);
-                    content = templates.watchPage(watchData, state.currentAnimeDetail, params.link, state.currentAnimeDetail);
-                    localData.addToHistory({ anime_link: params.anime_link, seriesTitle: params.anime_title, thumbnail: params.thumbnail });
-                }
-                appContent.innerHTML = content;
-                if (page === 'home') new Swiper('.swiper-container', { loop: true, autoplay: { delay: 3000 }, slidesPerView: 1 });
-            } catch (e) { appContent.innerHTML = `<p>Gagal memuat. Periksa URL API di app.js atau coba lagi.</p>`; }
-        }
-    };
-
-    document.body.addEventListener('click', async e => {
-        const navButton = e.target.closest('.nav-button');
-        if (navButton) {
-            e.preventDefault();
-            router.render(navButton.dataset.page);
-            return;
-        }
-
-        const card = e.target.closest('.anime-card, .swiper-slide');
-        if (card) {
-            e.preventDefault();
-            router.render('detail', { link: card.dataset.link, title: card.dataset.title, thumbnail: card.dataset.thumbnail });
-            return;
-        }
-        
-        const epCardOrButton = e.target.closest('.episode-card, .ep-button, .prev-ep-btn, .next-ep-btn');
-        if (epCardOrButton && epCardOrButton.dataset.link && epCardOrButton.dataset.link !== 'null') {
-            e.preventDefault();
-            router.render('watch', { 
-                link: epCardOrButton.dataset.link,
-                anime_link: state.currentAnimeDetail.link,
-                anime_title: state.currentAnimeDetail.title,
-                thumbnail: state.currentAnimeDetail.thumbnail
-            });
-            return;
-        }
-
-        const subscribeButton = e.target.closest('.subscribe-button');
-        if (subscribeButton) {
-            e.preventDefault();
-            const isSubscribed = localData.isSubscribed(state.currentAnimeDetail.link);
-            if (isSubscribed) localData.removeSubscription(state.currentAnimeDetail.link);
-            else localData.addSubscription(state.currentAnimeDetail);
-            
-            const isNowSubscribed = localData.isSubscribed(state.currentAnimeDetail.link);
-            subscribeButton.textContent = isNowSubscribed ? '✔ Unsubscribe' : '➕ Subscribe';
-            subscribeButton.classList.toggle('subscribed', isNowSubscribed);
-            return;
+    // --- FUNGSI OTENTIKASI ---
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            currentUser = user;
+            loginPage.style.display = 'none';
+            appContainer.style.display = 'flex';
+            updateUserInfo(user);
+            initializeHomepage();
+        } else {
+            currentUser = null;
+            loginPage.style.display = 'flex';
+            appContainer.style.display = 'none';
         }
     });
 
-    document.body.addEventListener('submit', async e => {
-        if (e.target.id === 'search-form') {
-            e.preventDefault();
-            const query = e.target.querySelector('#search-input').value.trim();
-            if (query) {
-                const resultsContainer = document.getElementById('search-results') || appContent;
-                resultsContainer.innerHTML = templates.loader();
-                const data = await apiService.fetchData(`?search=${encodeURIComponent(query)}`);
-                resultsContainer.innerHTML = `<div class="anime-grid">${(data.results || []).map(anime => templates.animeCard(anime, false)).join('')}</div>`;
+    loginBtn.addEventListener('click', () => auth.signInWithPopup(provider).catch(console.error));
+    logoutBtn.addEventListener('click', () => auth.signOut());
+
+    function updateUserInfo(user) {
+        document.getElementById('user-pic').src = user.photoURL;
+        document.getElementById('user-name').textContent = user.displayName;
+        document.getElementById('user-email').textContent = user.email;
+        document.getElementById('comment-user-pic').src = user.photoURL;
+    }
+
+    // --- FUNGSI NAVIGASI & VIEW ---
+    function switchView(viewId, pushToHistory = true) {
+        if (pushToHistory) {
+            viewHistory.push(viewId);
+        }
+        document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        mainContent.scrollTop = 0;
+
+        navButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.view === viewId);
+        });
+    }
+
+    navButtons.forEach(button => {
+        button.addEventListener('click', () => switchView(button.dataset.view));
+    });
+
+    backButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            if (viewHistory.length > 1) {
+                viewHistory.pop();
+                switchView(viewHistory[viewHistory.length - 1], false);
             }
-        }
+        });
     });
 
-    router.render('home');
+    // --- FUNGSI RENDER KONTEN ---
+    function renderLoading(container) {
+        container.innerHTML = '<p>Loading...</p>';
+    }
+
+    function renderError(container, message = "Gagal memuat data.") {
+        container.innerHTML = `<p>${message}</p>`;
+    }
+    
+    // --- FUNGSI SCRAPER CALLS & RENDER ---
+
+    async function initializeHomepage() {
+        const sliderContainer = document.querySelector('.slider');
+        const latestList = document.getElementById('latest-releases-list');
+        const popularList = document.getElementById('popular-list');
+        
+        renderLoading(sliderContainer);
+        renderLoading(latestList);
+        renderLoading(popularList);
+        
+        try {
+            const response = await fetch('/.netlify/functions/scrape?target=home');
+            const data = await response.json();
+
+            // Render Slider
+            sliderContainer.innerHTML = data.slider.map(anime => `
+                <div class="slide" data-anime-url="${anime.url}">
+                    <img src="${anime.poster}" alt="${anime.title}">
+                    <div class="title">${anime.title}</div>
+                </div>
+            `).join('');
+            sliderContainer.querySelectorAll('.slide').forEach(slide => {
+                 slide.addEventListener('click', () => showEpisodeList(slide.dataset.animeUrl));
+            });
+
+            // Render Latest Release
+            latestList.innerHTML = '';
+            data.latest.forEach(anime => latestList.appendChild(createAnimeCard(anime)));
+
+            // Render Popular Weekly
+            popularList.innerHTML = '';
+            data.popularWeekly.forEach(anime => popularList.appendChild(createPopularItem(anime)));
+
+        } catch (error) {
+            console.error(error);
+            renderError(sliderContainer);
+            renderError(latestList);
+            renderError(popularList);
+        }
+    }
+
+    function createAnimeCard(anime) {
+        const card = document.createElement('div');
+        card.className = 'anime-card';
+        card.dataset.animeUrl = anime.url;
+        const displayTitle = anime.episode ? `${anime.title} - ${anime.episode}` : anime.title;
+        card.innerHTML = `
+            <img src="${anime.poster}" alt="${anime.title}" loading="lazy">
+            <div class="title">${displayTitle}</div>`;
+        card.addEventListener('click', () => showEpisodeList(anime.url));
+        return card;
+    }
+
+    function createPopularItem(anime) {
+        const item = document.createElement('div');
+        item.className = 'popular-item';
+        item.dataset.animeUrl = anime.url;
+        item.innerHTML = `
+            <span class="rank">${anime.rank}</span>
+            <img src="${anime.poster}" alt="${anime.title}" loading="lazy">
+            <div class="info"><div class="title">${anime.title}</div></div>`;
+        item.addEventListener('click', () => showEpisodeList(anime.url));
+        return item;
+    }
+
+    async function performSearch() {
+        const query = searchInput.value.trim();
+        if (!query) return;
+        switchView('search-results-view');
+        const resultsList = document.getElementById('search-results-list');
+        renderLoading(resultsList);
+        try {
+            const response = await fetch(`/.netlify/functions/scrape?target=search&query=${query}`);
+            const data = await response.json();
+            resultsList.innerHTML = '';
+            if (data.length > 0) {
+                data.forEach(anime => resultsList.appendChild(createAnimeCard(anime)));
+            } else {
+                renderError(resultsList, 'Anime tidak ditemukan.');
+            }
+        } catch (error) {
+            console.error(error);
+            renderError(resultsList);
+        }
+    }
+
+    searchButton.addEventListener('click', performSearch);
+    searchInput.addEventListener('keypress', e => e.key === 'Enter' && performSearch());
+
+    async function showEpisodeList(animeUrl) {
+        switchView('episode-list-view');
+        const detailContent = document.getElementById('anime-detail-content');
+        const episodeList = document.getElementById('episode-list');
+        renderLoading(detailContent);
+        renderLoading(episodeList);
+        try {
+            const response = await fetch(`/.netlify/functions/scrape?target=episodes&url=${encodeURIComponent(animeUrl)}`);
+            currentAnimeData = await response.json(); // Simpan data anime saat ini
+            
+            detailContent.innerHTML = `
+                <img src="${currentAnimeData.poster}" alt="${currentAnimeData.title}">
+                <div class="info">
+                    <h2>${currentAnimeData.title}</h2>
+                    <p>${currentAnimeData.synopsis}</p>
+                </div>`;
+            
+            episodeList.innerHTML = '';
+            currentAnimeData.episodes.forEach(ep => {
+                const epItem = document.createElement('div');
+                epItem.className = 'episode-item';
+                // Ekstrak nomor episode dari judul
+                const epNum = ep.title.match(/Episode (\d+)/);
+                epItem.textContent = epNum ? `Eps ${epNum[1]}` : ep.title;
+                epItem.addEventListener('click', () => showWatchPage(ep.url));
+                episodeList.appendChild(epItem);
+            });
+        } catch (error) {
+            console.error(error);
+            renderError(detailContent);
+            renderError(episodeList);
+        }
+    }
+
+    async function showWatchPage(episodeUrl) {
+        switchView('watch-view');
+        const videoPlayer = document.getElementById('video-player');
+        const watchInfo = document.querySelector('.video-info');
+        renderLoading(watchInfo);
+        videoPlayer.src = '';
+
+        try {
+            const response = await fetch(`/.netlify/functions/scrape?target=watch&url=${encodeURIComponent(episodeUrl)}`);
+            const watchData = await response.json();
+
+            videoPlayer.src = watchData.videoEmbedUrl;
+            
+            document.getElementById('watch-anime-poster').src = currentAnimeData.poster;
+            document.getElementById('watch-anime-title').textContent = currentAnimeData.title;
+            // Dapatkan judul episode dari URL
+            const currentEp = currentAnimeData.episodes.find(ep => ep.url === episodeUrl);
+            document.getElementById('watch-episode-number').textContent = currentEp.title;
+
+            const prevBtn = document.getElementById('prev-episode');
+            const nextBtn = document.getElementById('next-episode');
+
+            prevBtn.disabled = !watchData.prevEpisodeUrl;
+            nextBtn.disabled = !watchData.nextEpisodeUrl;
+
+            prevBtn.onclick = () => watchData.prevEpisodeUrl && showWatchPage(watchData.prevEpisodeUrl);
+            nextBtn.onclick = () => watchData.nextEpisodeUrl && showWatchPage(watchData.nextEpisodeUrl);
+
+        } catch (error) {
+            console.error(error);
+            renderError(watchInfo);
+        }
+    }
+    
+    // --- PWA Service Worker ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed: ', err));
+        });
+    }
 });
