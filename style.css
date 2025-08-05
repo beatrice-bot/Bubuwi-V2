@@ -1,3 +1,4 @@
+/* --- General & Dark Theme --- */
 :root {
     --primary-bg: #121212;
     --secondary-bg: #1e1e1e;
@@ -30,7 +31,35 @@ body {
     border: 1px solid var(--border-color);
 }
 
-/* --- Login --- */
+/* --- Loading Indicator --- */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #555;
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* --- Login Page --- */
 #login-page {
     display: flex;
     justify-content: center;
@@ -39,7 +68,10 @@ body {
     text-align: center;
     padding: 1rem;
 }
-.login-container h1 { font-size: 1.5rem; margin-bottom: 2rem; }
+.login-container h1 {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+}
 .login-box {
     display: flex;
     align-items: center;
@@ -52,17 +84,42 @@ body {
     max-width: 250px;
     margin: 0 auto;
 }
-.login-box:hover { background-color: var(--secondary-bg); }
-.login-box img { width: 24px; height: 24px; margin-right: 12px; }
-.login-box span { font-size: 1.1rem; font-weight: bold; }
+.login-box:hover {
+    background-color: var(--secondary-bg);
+}
+.login-box img {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+}
+.login-box span {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
 
-/* --- App Container & Navigasi --- */
-#app-container { display: flex; flex-direction: column; height: 100vh; }
-#main-content { flex-grow: 1; overflow-y: auto; padding-bottom: 70px; }
-.view { display: none; padding: 4px; animation: fadeIn 0.4s; }
-.view.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+/* --- App Container & Navigation --- */
+#app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+#main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-bottom: 70px;
+}
+.view {
+    display: none;
+    padding: 4px;
+    animation: fadeIn 0.4s;
+}
+.view.active {
+    display: block;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 #bottom-nav {
     position: fixed;
     bottom: 0;
@@ -77,25 +134,70 @@ body {
     z-index: 1000;
 }
 .nav-button {
-    background: none; border: none; color: var(--text-secondary); cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    font-size: 0.7rem; transition: color 0.3s;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    transition: color 0.3s;
 }
-.nav-button i { font-size: 1.4rem; }
-.nav-button.active { color: var(--accent-color); }
+.nav-button i {
+    font-size: 1.4rem;
+}
+.nav-button.active {
+    color: var(--accent-color);
+}
 
-/* --- Tampilan Utama --- */
-.slider-container { width: calc(100% - 24px); margin: 12px; height: 200px; overflow: hidden; position: relative; border-radius: 12px; }
-.slider { display: flex; height: 100%; transition: transform 0.5s ease-in-out; }
-.slide { min-width: 100%; height: 100%; position: relative; color: white; cursor: pointer; }
-.slide img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6); }
-.slide .title { position: absolute; bottom: 10px; left: 10px; font-size: 1.2rem; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+/* --- Home View --- */
+.slider-container {
+    width: calc(100% - 24px);
+    margin: 12px;
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+    border-radius: 12px;
+}
+.slider {
+    display: flex;
+    height: 100%;
+    transition: transform 0.5s ease-in-out;
+}
+.slide {
+    min-width: 100%;
+    height: 100%;
+    position: relative;
+    color: white;
+    cursor: pointer;
+}
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.6);
+}
+.slide .title {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
 
-h3 { margin: 16px 12px 8px; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
-/* Search Section Diperbaiki */
+h3 {
+    margin: 16px 12px 8px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 .search-section {
     display: flex;
-    padding: 8px; /* Padding lebih kecil agar pas */
+    padding: 8px;
 }
 #search-input {
     flex-grow: 1;
@@ -104,7 +206,7 @@ h3 { margin: 16px 12px 8px; font-size: 1.2rem; display: flex; align-items: cente
     background-color: var(--secondary-bg);
     color: var(--text-primary);
     font-size: 1rem;
-    border-radius: 8px 0 0 8px; /* Siku kiri bulat */
+    border-radius: 8px 0 0 8px;
     outline: none;
 }
 #search-button {
@@ -115,97 +217,323 @@ h3 { margin: 16px 12px 8px; font-size: 1.2rem; display: flex; align-items: cente
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.2s;
-    border-radius: 0 8px 8px 0; /* Siku kanan bulat */
+    border-radius: 0 8px 8px 0;
 }
-#search-button:hover { background-color: #556bb4; }
+#search-button:hover {
+    background-color: #556bb4;
+}
 
-.anime-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 12px; }
-.anime-grid-mini { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; padding: 0 12px; }
-
+.anime-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 0 12px;
+}
+.anime-grid-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    padding: 0 12px;
+}
 .anime-card {
-    background-color: var(--card-bg); border-radius: 8px; overflow: hidden;
-    border: 1px solid transparent; transition: border-color 0.3s; cursor: pointer;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid transparent;
+    transition: border-color 0.3s;
+    cursor: pointer;
 }
-.anime-card:hover { border-color: var(--accent-color); }
-.anime-card img { width: 100%; height: 150px; object-fit: cover; }
-.anime-card .title { padding: 8px; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
+.anime-card:hover {
+    border-color: var(--accent-color);
+}
+.anime-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+.anime-card .title {
+    padding: 8px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .popular-list .popular-item {
-    display: flex; align-items: center; background-color: var(--card-bg);
-    margin: 0 12px 8px; padding: 8px; border-radius: 8px; cursor: pointer;
+    display: flex;
+    align-items: center;
+    background-color: var(--card-bg);
+    margin: 0 12px 8px;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
 }
-.popular-item .rank { font-size: 1.5rem; font-weight: bold; color: var(--accent-color); margin: 0 12px; }
-.popular-item img { width: 50px; height: 70px; object-fit: cover; border-radius: 4px; margin-right: 12px; }
-.popular-item .title { font-size: 1rem; }
+.popular-item .rank {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    margin: 0 12px;
+}
+.popular-item img {
+    width: 50px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 12px;
+}
+.popular-item .title {
+    font-size: 1rem;
+}
 
 /* --- Tombol & Halaman Riwayat/Subscribe --- */
 .back-button {
-    background: none; border: none; color: var(--accent-color); font-size: 1rem;
-    padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-size: 1rem;
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
 }
-
-.empty-state-container { padding: 12px; }
+.empty-state-container {
+    padding: 12px;
+}
 .empty-state-card {
-    background-color: var(--card-bg); border-radius: 12px;
-    padding: 40px 20px; text-align: center; color: var(--text-secondary);
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-secondary);
 }
 
-/* --- Halaman Akun Diperbaiki --- */
-.account-logo-card, .account-info-card { text-align: center; }
-.account-logo { width: 100px; height: 100px; }
-.profile-pic { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--accent-color); margin-bottom: 12px; }
-.account-info-card h2 { margin-bottom: 4px; }
-.account-info-card p { color: var(--text-secondary); font-size: 0.9rem; }
+/* --- Halaman Akun --- */
+.account-logo-card, .account-info-card {
+    text-align: center;
+}
+.account-logo {
+    width: 100px;
+    height: 100px;
+}
+.profile-pic {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--accent-color);
+    margin-bottom: 12px;
+}
+.account-info-card h2 {
+    margin-bottom: 4px;
+}
+.account-info-card p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
 .contact-item {
-    display: flex; align-items: center; gap: 12px; background-color: var(--secondary-bg);
-    padding: 12px; border-radius: 8px; margin-top: 8px;
-    text-decoration: none; color: var(--text-primary); transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--secondary-bg);
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background-color 0.2s;
 }
-.contact-item img { width: 32px; height: 32px; border-radius: 8px; }
+.contact-item img {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+}
 .logout-button {
-    width: calc(100% - 24px); margin: 20px 12px 0; background-color: #d32f2f;
-    padding: 12px 20px; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer;
+    width: calc(100% - 24px);
+    margin: 20px 12px 0;
+    background-color: #d32f2f;
+    padding: 12px 20px;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
-/* --- Halaman Episode Diperbaiki --- */
-#anime-detail-content { display: flex; gap: 16px; align-items: flex-start; }
-#anime-detail-content img { width: 120px; flex-shrink: 0; height: 170px; object-fit: cover; border-radius: 8px; }
-#anime-detail-content .info p { color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px; }
-.subscribe-button { width: calc(100% - 24px); margin: 0 12px 12px; /* Dihilangkan margin atas */}
-.episode-list-container { margin: 0 12px; padding: 16px; }
-.episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; margin-top: 12px; }
+/* --- Halaman Episode --- */
+#anime-detail-header {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+#anime-detail-header img {
+    width: 120px;
+    flex-shrink: 0;
+    height: 170px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+#anime-detail-header .info h2 {
+    font-size: 1.2rem;
+}
+.synopsis-card {
+    margin-top: 0;
+}
+.synopsis-card p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+.subscribe-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: calc(100% - 24px);
+    margin: 12px;
+    padding: 12px 20px;
+    border: 1px solid var(--accent-color);
+    background-color: transparent;
+    color: var(--accent-color);
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.subscribe-button.active {
+    background-color: #2e7d32;
+    color: white;
+    border-color: #2e7d32;
+}
+.episode-list-container {
+    margin: 0 12px;
+    padding: 16px;
+}
+.episodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
 .episode-item {
-    background-color: var(--secondary-bg); padding: 12px 8px; text-align: center;
-    border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer; transition: background-color 0.2s;
+    background-color: var(--secondary-bg);
+    padding: 12px 8px;
+    text-align: center;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
-.episode-item:hover, .episode-item.active { background-color: var(--accent-color); color: white; }
+.episode-item:hover, .episode-item.active {
+    background-color: var(--accent-color);
+    color: white;
+}
 
-/* --- Halaman Nonton Diperbaiki --- */
-.video-player-container { position: relative; padding-top: 56.25%; background-color: black; }
-#video-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-#watch-info-box { text-align: center; font-size: 1.1rem; font-weight: bold; }
-.episode-navigation { display: flex; justify-content: space-between; padding: 0 12px; margin-top: 12px; }
-.nav-btn { width: 48%; padding: 12px; border: none; background-color: var(--accent-color);
-    color: white; font-weight: bold; border-radius: 8px; cursor: pointer; }
-.nav-btn:disabled { background-color: #555; cursor: not-allowed; }
-.episode-list-container-watch { margin-top: 12px; }
+/* --- Halaman Nonton --- */
+.video-player-card {
+    padding: 8px;
+}
+.video-player-container {
+    position: relative;
+    padding-top: 56.25%;
+    background-color: black;
+    border-radius: 8px;
+    overflow: hidden;
+}
+#video-player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+#watch-info-box {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 12px;
+    margin-top: 0;
+}
+.episode-navigation {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 12px;
+    margin-top: 12px;
+}
+.nav-btn {
+    width: 48%;
+    padding: 12px;
+    border: none;
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.nav-btn:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+.episode-list-container-watch {
+    margin-top: 12px;
+}
 
-/* Komentar Diperbaiki */
-#add-comment-container { padding: 12px; }
-.add-comment { display: flex; align-items: center; gap: 8px; }
-.profile-pic-comment { width: 36px; height: 36px; border-radius: 50%; }
+/* --- Komentar --- */
+#add-comment-container {
+    padding: 12px;
+}
+.add-comment {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.profile-pic-comment {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
 #comment-input {
-    flex-grow: 1; padding: 10px; background-color: var(--secondary-bg);
-    border: 1px solid var(--border-color); border-radius: 18px; color: var(--text-primary);
+    flex-grow: 1;
+    padding: 10px;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    color: var(--text-primary);
 }
 #comment-submit-btn {
-    background: var(--accent-color); color: white; border: none; border-radius: 50%;
-    width: 38px; height: 38px; flex-shrink: 0; font-size: 1rem; cursor: pointer;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    font-size: 1rem;
+    cursor: pointer;
 }
-#comment-submit-btn:disabled { background-color: #555; cursor: not-allowed; }
-
-#comments-list-container { margin-top: 0; }
-.comment { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
-.comment-content { background-color: var(--secondary-bg); padding: 8px 12px; border-radius: 12px; width: 100%; }
-.comment-content .username { font-weight: bold; font-size: 0.9rem; margin-bottom: 4px; }
-.comment-content p { word-wrap: break-word; } /* Agar teks panjang tidak keluar box */
+#comment-submit-btn:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+}
+#comments-list-container {
+    margin-top: 0;
+}
+.comment {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+}
+.comment-content {
+    background-color: var(--secondary-bg);
+    padding: 8px 12px;
+    border-radius: 12px;
+    width: 100%;
+}
+.comment-content .username {
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+.comment-content p {
+    word-wrap: break-word;
+}
